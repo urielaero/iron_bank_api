@@ -38,6 +38,7 @@ defmodule IronBank.Mixfile do
      {:cowboy, "~> 1.0"},
      {:ecto_enum, "~> 0.3.0"},
      {:mix_test_watch, "~> 0.2", only: :dev},
+     {:mailgun, "~> 0.1.2"},
      {:swaggerdoc, github: "urielaero/swaggerdoc"},
      {:cors_plug, "~> 0.1.4"}]
   end

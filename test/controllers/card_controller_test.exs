@@ -2,7 +2,7 @@ defmodule IronBank.CardControllerTest do
   use IronBank.ConnCase
 
   alias IronBank.Card
-  @valid_attrs %{active: true, card_number: "some content", name: :nomina, type: :credit}
+  @valid_attrs %{active: true, name: :nomina, type: :credit}
   @invalid_attrs %{}
 
   setup do
@@ -20,7 +20,7 @@ defmodule IronBank.CardControllerTest do
     conn = get conn, card_path(conn, :show, card)
     assert json_response(conn, 200)["data"] == %{"id" => card.id,
       "type" => "debit",
-      "card_number" => card.card_number,
+      "card_number" => card.id,
       "name" => card.name,
       "active" => card.active}
 

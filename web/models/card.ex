@@ -2,7 +2,7 @@ defmodule IronBank.Card do
   use IronBank.Web, :model
 
   schema "cards" do
-    field :card_number, :string
+    #field :card_number, :string alias of id
     field :name, CardNameEnum
     field :active, :boolean, default: false
     field :type, CardTypeEnum
@@ -12,7 +12,7 @@ defmodule IronBank.Card do
     timestamps
   end
 
-  @required_fields ~w(type card_number name)
+  @required_fields ~w(type name)
   @optional_fields ~w(active)
 
   @doc """

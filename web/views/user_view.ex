@@ -16,7 +16,7 @@ defmodule IronBank.UserView do
       email: user.email,
       address: user.address,
       phone: user.phone,
-      code: user.code,
+      code: user.id,
       active: user.active}
   end
 end

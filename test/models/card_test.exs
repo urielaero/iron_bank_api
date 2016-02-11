@@ -3,7 +3,7 @@ defmodule IronBank.CardTest do
 
   alias IronBank.Card
 
-  @valid_attrs %{active: true, card_number: "some content", name: :oro, type: :debit}
+  @valid_attrs %{active: true, name: :oro, type: :debit}
   @invalid_attrs %{}
 
   test "changeset with valid attributes" do

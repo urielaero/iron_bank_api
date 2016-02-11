@@ -2,7 +2,7 @@ defmodule IronBank.UserControllerTest do
   use IronBank.ConnCase
 
   alias IronBank.User
-  @valid_attrs %{code: "asdasd", type: :executive, active: true, address: "some content", code: "some content", email: "some content", last_name: "some content", name: "some content", phone: "some content"}
+  @valid_attrs %{type: :executive, active: true, address: "some content", email: "some content", last_name: "some content", name: "some content", phone: "some content"}
   @invalid_attrs %{}
 
   setup do
@@ -24,7 +24,7 @@ defmodule IronBank.UserControllerTest do
       "email" => user.email,
       "address" => user.address,
       "phone" => user.phone,
-      "code" => user.code,
+      "code" => user.id,
       "active" => user.active}
   end
 

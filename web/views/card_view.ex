@@ -12,7 +12,7 @@ defmodule IronBank.CardView do
   def render("card.json", %{card: card}) do
     %{id: card.id,
       type: card.type,
-      card_number: card.card_number,
+      card_number: card.id,
       name: card.name,
       active: card.active}
   end
