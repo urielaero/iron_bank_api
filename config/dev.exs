@@ -46,7 +46,7 @@ config :iron_bank, mailgun_domain: System.get_env("MAILGUN_DOMAIN"),
                    mailgun_key: System.get_env("MAILGUN_KEY")
 
 config :iron_bank, mailer_api: Util.Mailer,
-                   ldap_api: Util.GenLdap,
+                   ldap_api: Util.GenLdap.InMemory,
                    token_api: Phoenix.Token
 
 config :iron_bank, :http_front, "http://localhost:4000"

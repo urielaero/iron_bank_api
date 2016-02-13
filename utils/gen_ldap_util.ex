@@ -98,6 +98,16 @@ defmodule Util.GenLdap.InMemory do
   end
 
   def set_password(cn, password) do
+    file_name = "test_pass.txt"
+    {stat, body} = File.read(file_name)
+    if stat != :ok do
+      body = ""
+    end
+    
+    {:ok, file} = File.open(file_name, [:write])
+    IO.write file, "#{body} \n #{cn},#{password}"
+    File.close(file)
+
     Agent.update(__MODULE__, &(Dict.put(&1, cn, password)))
   end
 
