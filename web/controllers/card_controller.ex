@@ -4,7 +4,9 @@ defmodule IronBank.CardController do
   alias IronBank.Card
   alias IronBankDoc.Card, as: Doc
 
-  plug :scrub_params, "card" when action in [:create, :update]
+  @password_salt "moo7ukuS"
+  @auth_required [:create, :update, :delete]
+  plug Util.PlugAuthToken, [salt: @password_salt] when action in @auth_required
 
   def swaggerdoc_index, do: Doc.index
 
@@ -15,7 +17,7 @@ defmodule IronBank.CardController do
 
   def swaggerdoc_create, do: Doc.create
 
-  def create(conn, %{"card" => card_params}) do
+  def create(conn, card_params) do
     changeset = Card.changeset(%Card{}, card_params)
 
     case Repo.insert(changeset) do
@@ -39,7 +41,7 @@ defmodule IronBank.CardController do
 
   def swaggerdoc_update, do: Doc.update
 
-  def update(conn, %{"id" => id, "card" => card_params}) do
+  def update(conn, %{"id" => id} = card_params) do
     card = Repo.get!(Card, id)
     changeset = Card.changeset(card, card_params)
 

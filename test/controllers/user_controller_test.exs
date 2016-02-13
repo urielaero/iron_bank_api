@@ -111,7 +111,8 @@ defmodule IronBank.UserControllerTest do
     assert res["active"]
 
     conn = post conn, user_path(conn, :login), code: res["id"], password: password
-    assert json_response(conn, 200)["data"]
+    res = json_response(conn, 200)["data"]
+    assert res["token"]
 
     conn = post conn, user_path(conn, :login), code: res["id"], password: "badpass"
     assert json_response(conn, 403)
