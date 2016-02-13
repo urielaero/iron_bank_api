@@ -4,6 +4,15 @@ defmodule IronBank.UserControllerTest do
   alias IronBank.User
   alias Util.Mailer.InMemory, as: Mailer
   alias Util.GenLdap.InMemory, as: GenLdap
+
+  def insert_user(type, password) do
+    user = Repo.insert! %User{name: "lol", last_name: "last lol", email: "other@gmail.com", type: type}
+    ldap = User.format_ldap(user)
+    GenLdap.set_password(ldap.cn, password)
+    conn = post conn, user_path(conn, :login), code: user.id, password: password
+    res = json_response(conn, 200)["data"]
+    res["token"]
+  end
   
   @valid_attrs %{type: :executive, active: true, address: "some content", email: "some@content.com", last_name: "some content", name: "some content", phone: "some content"}
   @invalid_attrs %{}
@@ -12,7 +21,7 @@ defmodule IronBank.UserControllerTest do
     conn = conn() |> put_req_header("accept", "application/json")
     Mailer.start_link
     GenLdap.start_link
-
+    Util.PlugAuthTokenTest.start_link
     {:ok, conn: conn}
   end
 
@@ -41,8 +50,12 @@ defmodule IronBank.UserControllerTest do
     end
   end
 
+  @tag :only
   test "creates and renders resource when data is valid", %{conn: conn} do
-    conn = post conn, user_path(conn, :create), @valid_attrs
+    user_executive_token = insert_user(2, 'mylol')
+    valid = @valid_attrs
+    valid = Dict.put(valid, :token, user_executive_token)
+    conn = post conn, user_path(conn, :create), valid
     assert json_response(conn, 201)["data"]["id"]
     assert Repo.get_by(User, @valid_attrs)
 
@@ -51,7 +64,10 @@ defmodule IronBank.UserControllerTest do
   end
 
   test "does not create resource and renders errors when data is invalid", %{conn: conn} do
-    conn = post conn, user_path(conn, :create), @invalid_attrs
+    user_executive_token = insert_user(2, 'mylol')
+    valid = @invalid_attrs
+    valid = Dict.put(valid, :token, user_executive_token)
+    conn = post conn, user_path(conn, :create), valid 
     assert json_response(conn, 422)["errors"] != %{}
   end
 
@@ -71,15 +87,20 @@ defmodule IronBank.UserControllerTest do
   end
 
   test "deletes chosen resource", %{conn: conn} do
+    user_executive_token = insert_user(2, 'mylol')
     user = Repo.insert! %User{}
-    conn = delete conn, user_path(conn, :delete, user)
+    conn = delete conn, user_path(conn, :delete, user), token: user_executive_token
     assert response(conn, 204)
     refute Repo.get(User, user.id)
   end
 
 
   test "should set password of user by url and token and verify login" do
-    conn = post conn, user_path(conn, :create), @valid_attrs
+    valid_to_create = @valid_attrs
+    user_executive_token = insert_user(2, 'mylol')
+    valid_to_create = Dict.put(valid_to_create, :token, user_executive_token)
+
+    conn = post conn, user_path(conn, :create), valid_to_create 
     res = json_response(conn, 201)["data"]
     assert res["id"]
     token = Mailer.get_inbox(@valid_attrs[:email]) 

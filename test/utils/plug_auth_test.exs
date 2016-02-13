@@ -8,16 +8,36 @@ defmodule Util.PlugAuthTokenTest do
 
   @opts PlugAuthToken.init(salt: @login_salt)
 
-  def config(opts) do 
-    :ok
+  def start_link do
+    Agent.start_link(fn -> %{} end, name: __MODULE__)
   end
 
   def verify(_endpoint, _salt, "token!", _opts) do
     {:ok, @user_id}
   end
 
-  def verify(_endpoint, _salt, _token, _opts) do
-    {:error, :bad_token}
+  def verify(_endpoint, _salt, token, _opts) do
+    Agent.get(__MODULE__, fn pass -> 
+      user_pass = Dict.get(pass, token)
+      if user_pass, do: {:ok, user_pass}, else: {:error, :bad_token}
+    end)
+
+  end
+
+
+  def sign(_endpoint, _salt, plaint) do
+    Agent.update(__MODULE__, fn di -> 
+      l = length(Dict.to_list(di))
+      Dict.put(di, l, plaint)
+    end)
+    Agent.get(__MODULE__, fn pass -> 
+      length(Dict.to_list(pass)) - 1
+    end)
+  end
+
+  setup do
+    start_link
+    {:ok, lol: 2}
   end
 
   test "return 401 if not token in request" do

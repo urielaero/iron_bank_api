@@ -3,15 +3,18 @@ defmodule IronBank.UserController do
 
   alias IronBank.User
   alias IronBankDoc.User, as: Doc
+
+  @password_salt "moo7ukuS"
+  @auth_required [:create, :update, :delete]
+  plug Util.PlugAuthToken, [salt: @password_salt] when action in @auth_required
   
   @mailer_api Application.get_env(:iron_bank, :mailer_api) 
   @ldap_api Application.get_env(:iron_bank, :ldap_api)
+  @token_api Application.get_env(:iron_bank, :token_api)
   @http_front Application.get_env(:iron_bank, :http_front)
 
   @cn_admin Application.get_env(:iron_bank, :cn_admin)
   @cn_password Application.get_env(:iron_bank, :cn_password)
-
-  #@ldap_api.start_link(@cn_admin, @cn_password)
 
   def swaggerdoc_index, do: Doc.index
 
@@ -54,7 +57,6 @@ defmodule IronBank.UserController do
   def swaggerdoc_update, do: Doc.update
 
   def update(conn, %{"id" => id} = user_params) do
-    IO.inspect user_params
     user = Repo.get!(User, id)
     changeset = User.changeset(user, user_params)
 
@@ -106,7 +108,9 @@ defmodule IronBank.UserController do
     ldap = User.format_ldap(user)
     ch_password = to_char_list(password)
     case @ldap_api.verify(ldap.cn, ch_password) do
-      true -> render(conn, "show.json", user: user)
+      true -> 
+        token = @token_api.sign(conn, @password_salt, user.id) 
+        render(conn, "user_login.json", user: user, token: token)
       false -> 
         conn
         |> put_status(:forbidden)
