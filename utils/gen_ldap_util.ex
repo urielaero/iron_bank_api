@@ -2,7 +2,9 @@ defmodule Util.GenLdap do
 
   use GenServer
 
-  def start_link(cn_admin, password) do
+  def start_link do
+    cn_admin = Application.get_env(:iron_bank, :cn_admin) 
+    password = Application.get_env(:iron_bank, :cn_password) 
     GenServer.start_link(__MODULE__, {:ok, cn_admin, password}, name: __MODULE__)
   end
 
@@ -85,4 +87,31 @@ defmodule Util.GenLdap do
     end
   end
 
+end
+
+defmodule Util.GenLdap.InMemory do
+
+  def start_link do
+    Agent.start_link(fn -> 
+      %{}
+    end, name: __MODULE__)
+  end
+
+  def set_password(cn, password) do
+    Agent.update(__MODULE__, &(Dict.put(&1, cn, password)))
+  end
+
+  def verify(cn, password) do
+    Agent.get(__MODULE__, fn pass -> 
+      user_pass = Dict.get(pass, cn)
+      password == user_pass
+    end)
+
+  end
+
+  def create(_cn, _attributes) do
+    :ok
+  end
+
+  
 end

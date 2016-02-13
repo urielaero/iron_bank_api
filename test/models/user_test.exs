@@ -32,7 +32,7 @@ defmodule IronBank.UserTest do
     user_cn = to_char_list user.name
     user_last_name = to_char_list user.last_name
     assert user_format == %{
-      cn: "cn=#{user.id},ou=Users,dc=openstack,dc=org",
+      cn: 'cn=#{user.id},ou=Users,dc=openstack,dc=org',
       attributes: [{'objectclass', ['person']},
       {'cn', [user_cn]},
       {'sn', [user_last_name]}]

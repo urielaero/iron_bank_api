@@ -2,13 +2,18 @@ defmodule IronBank.CardController do
   use IronBank.Web, :controller
 
   alias IronBank.Card
+  alias IronBankDoc.Card, as: Doc
 
   plug :scrub_params, "card" when action in [:create, :update]
+
+  def swaggerdoc_index, do: Doc.index
 
   def index(conn, _params) do
     cards = Repo.all(Card)
     render(conn, "index.json", cards: cards)
   end
+
+  def swaggerdoc_create, do: Doc.create
 
   def create(conn, %{"card" => card_params}) do
     changeset = Card.changeset(%Card{}, card_params)
@@ -17,7 +22,6 @@ defmodule IronBank.CardController do
       {:ok, card} ->
         conn
         |> put_status(:created)
-        |> put_resp_header("location", card_path(conn, :show, card))
         |> render("show.json", card: card)
       {:error, changeset} ->
         conn
@@ -26,10 +30,14 @@ defmodule IronBank.CardController do
     end
   end
 
+  def swaggerdoc_show, do: Doc.show
+
   def show(conn, %{"id" => id}) do
     card = Repo.get!(Card, id)
     render(conn, "show.json", card: card)
   end
+
+  def swaggerdoc_update, do: Doc.update
 
   def update(conn, %{"id" => id, "card" => card_params}) do
     card = Repo.get!(Card, id)

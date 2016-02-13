@@ -3,6 +3,9 @@ defmodule IronBank do
 
   # See http://elixir-lang.org/docs/stable/elixir/Application.html
   # for more information on OTP Applications
+
+  @ldap_api Application.get_env(:iron_bank, :ldap_api)
+
   def start(_type, _args) do
     import Supervisor.Spec, warn: false
 
@@ -13,6 +16,7 @@ defmodule IronBank do
       worker(IronBank.Repo, []),
       # Here you could define other workers and supervisors as children
       # worker(IronBank.Worker, [arg1, arg2, arg3]),
+      worker(@ldap_api, []),
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html

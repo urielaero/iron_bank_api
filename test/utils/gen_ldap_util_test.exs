@@ -5,11 +5,8 @@ defmodule Util.GenLdapTest do
 
   @moduletag :genldap_api
 
-  @cn_admin Application.get_env(:iron_bank, :cn_admin)
-  @cn_password Application.get_env(:iron_bank, :cn_password)
-
   setup do
-    {:ok, ldap} = GenLdap.start_link(@cn_admin, @cn_password)
+    {:ok, ldap} = GenLdap.start_link
     {:ok, ldap: ldap}
   end
 
@@ -30,6 +27,8 @@ defmodule Util.GenLdapTest do
     attributes = [{'objectclass', ['person']},
       {'cn', ['Bill Valentine']},
       {'sn', ['last name']}]
+
+    
 
     res = GenLdap.create cn, attributes
     case res do

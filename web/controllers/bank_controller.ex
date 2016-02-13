@@ -2,13 +2,18 @@ defmodule IronBank.BankController do
   use IronBank.Web, :controller
 
   alias IronBank.Bank
+  alias IronBankDoc.Bank, as: Doc
 
   plug :scrub_params, "bank" when action in [:create, :update]
+
+  def swaggerdoc_index, do: Doc.index
 
   def index(conn, _params) do
     banks = Repo.all(Bank)
     render(conn, "index.json", banks: banks)
   end
+
+  def swaggerdoc_create, do: Doc.create
 
   def create(conn, %{"bank" => bank_params}) do
     changeset = Bank.changeset(%Bank{}, bank_params)
@@ -17,7 +22,6 @@ defmodule IronBank.BankController do
       {:ok, bank} ->
         conn
         |> put_status(:created)
-        |> put_resp_header("location", bank_path(conn, :show, bank))
         |> render("show.json", bank: bank)
       {:error, changeset} ->
         conn
@@ -26,10 +30,14 @@ defmodule IronBank.BankController do
     end
   end
 
+  def swaggerdoc_show, do: Doc.show
+
   def show(conn, %{"id" => id}) do
     bank = Repo.get!(Bank, id)
     render(conn, "show.json", bank: bank)
   end
+
+  def swaggerdoc_update, do: Doc.update
 
   def update(conn, %{"id" => id, "bank" => bank_params}) do
     bank = Repo.get!(Bank, id)

@@ -12,8 +12,8 @@ defmodule IronBank.Bank do
     timestamps
   end
 
-  @required_fields ~w(name address phones emails)
-  @optional_fields ~w()
+  @required_fields ~w(name)
+  @optional_fields ~w(address phones emails)
 
   @doc """
   Creates a changeset based on the `model` and `params`.

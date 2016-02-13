@@ -27,3 +27,5 @@ import_config "#{Mix.env}.exs"
 config :phoenix, :generators,
   migration: false,
   binary_id: true
+
+import_config "swaggerdoc.exs"

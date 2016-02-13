@@ -17,10 +17,15 @@ defmodule IronBank.Router do
     pipe_through :browser # Use the default browser stack
 
     get "/", PageController, :index
+
+    get "/docs.json", PageController, :doc
   end
 
   scope "/api/v1", IronBank do
     pipe_through :api
+
+    post "/users/set_password", UserController, :set_password
+    post "/users/login", UserController, :login
 
     resources "/users", UserController, except: [:new, :edit]
 

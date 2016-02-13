@@ -35,5 +35,7 @@ defmodule IronBank.Endpoint do
     key: "_iron_bank_key",
     signing_salt: "GXS9dx4B"
 
+  plug CORSPlug
+
   plug IronBank.Router
 end

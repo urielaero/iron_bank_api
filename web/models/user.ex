@@ -8,7 +8,7 @@ defmodule IronBank.User do
     field :address, :string
     field :phone, :string
     #field :code, :string
-    field :active, :boolean, default: false
+    field :active, :boolean, default: true
     field :type, UserTypeEnum
 
     belongs_to :bank, IronBank.Bank
@@ -38,7 +38,7 @@ defmodule IronBank.User do
 
 
   def format_ldap(%IronBank.User{id: id, name: name, last_name: last_name}) do
-    cn = "cn=#{id},#{@ldap_context}"
+    cn = 'cn=#{id},#{@ldap_context}'
     ch_name = to_char_list(name)
     ch_last_name = to_char_list(last_name)
     attributes = [{'objectclass', ['person']},
