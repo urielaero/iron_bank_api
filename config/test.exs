@@ -23,6 +23,7 @@ config :iron_bank, mailgun_domain: System.get_env("MAILGUN_DOMAIN"),
                    mailgun_key: System.get_env("MAILGUN_KEY")
 
 config :iron_bank, mailer_api: Util.Mailer.InMemory,
-                   ldap_api: Util.GenLdap.InMemory
+                   ldap_api: Util.GenLdap.InMemory,
+                   token_api: Util.PlugAuthTokenTest
 
 config :iron_bank, :http_front, "http://localhost:4000"
