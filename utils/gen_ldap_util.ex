@@ -105,8 +105,9 @@ end
 defmodule Util.GenLdap.InMemory do
 
   def start_link do
+    init = restore
     Agent.start_link(fn -> 
-      %{}
+      init
     end, name: __MODULE__)
   end
 
@@ -118,7 +119,7 @@ defmodule Util.GenLdap.InMemory do
     end
     
     {:ok, file} = File.open(file_name, [:write])
-    IO.write file, "#{body} \n #{cn},#{password}"
+    IO.write file, "#{body}\n#{cn}|#{password}"
     File.close(file)
 
     Agent.update(__MODULE__, &(Dict.put(&1, cn, password)))
@@ -148,6 +149,23 @@ defmodule Util.GenLdap.InMemory do
   def create(_cn, _attributes) do
     :ok
   end
-
   
+  defp restore() do
+    {stat, body} = File.read("test_pass.txt")
+    ldap = %{}
+    if stat == :ok do
+      lines = String.split body, "\n"
+      rest = Enum.reduce(lines, ldap, fn (l,acc) -> 
+          case String.split l, "|" do
+            [cn, password] -> 
+              Dict.put(acc, cn, password)
+            _ -> acc
+          end
+      end)
+      rest
+    else 
+      ldap
+    end
+
+  end
 end
