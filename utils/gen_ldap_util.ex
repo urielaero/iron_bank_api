@@ -159,7 +159,8 @@ defmodule Util.GenLdap.InMemory do
           case String.split l, "|" do
             [cn, password] -> 
               cn_binary = to_char_list cn
-              Dict.put(acc, cn_binary, password)
+              pass_binary = to_char_list password
+              Dict.put(acc, cn_binary, pass_binary)
             _ -> acc
           end
       end)
