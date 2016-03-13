@@ -158,7 +158,8 @@ defmodule Util.GenLdap.InMemory do
       rest = Enum.reduce(lines, ldap, fn (l,acc) -> 
           case String.split l, "|" do
             [cn, password] -> 
-              Dict.put(acc, cn, password)
+              cn_binary = to_char_list cn
+              Dict.put(acc, cn_binary, password)
             _ -> acc
           end
       end)
