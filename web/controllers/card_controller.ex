@@ -3,10 +3,12 @@ defmodule IronBank.CardController do
 
   alias IronBank.Card
   alias IronBankDoc.Card, as: Doc
+  alias IronBank.User
+  alias Util.PlugAuthToken
 
   @password_salt "moo7ukuS"
   @auth_required [:create, :update, :delete]
-  plug Util.PlugAuthToken, [salt: @password_salt] when action in @auth_required
+  plug PlugAuthToken, [salt: @password_salt] when action in @auth_required
 
   def swaggerdoc_index, do: Doc.index
 
@@ -41,7 +43,14 @@ defmodule IronBank.CardController do
 
   def swaggerdoc_update, do: Doc.update
 
-  def update(conn, %{"id" => id} = card_params) do
+  def update(conn, card_params) do
+    user_id = PlugAuthToken.get_data(conn)
+    user = Repo.get!(User, user_id)
+    if (user.type != :client), do: update(conn, card_params, user),
+    else: PlugAuthToken.unauthorized(conn)
+  end
+
+  def update(conn, %{"id" => id} = card_params, _user_auth) do
     card = Repo.get!(Card, id)
     changeset = Card.changeset(card, card_params)
 

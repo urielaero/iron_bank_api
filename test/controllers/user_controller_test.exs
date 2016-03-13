@@ -116,6 +116,33 @@ defmodule IronBank.UserControllerTest do
 
     conn = post conn, user_path(conn, :login), code: res["id"], password: "badpass"
     assert json_response(conn, 403)
+  end
 
+  @tag :skip
+  test "should change password in update" do
+    valid_to_create = @valid_attrs
+    user_executive_token = insert_user(2, 'mylol')
+    valid_to_create = Dict.put(valid_to_create, :token, user_executive_token)
+
+    conn = post conn, user_path(conn, :create), valid_to_create 
+    res = json_response(conn, 201)["data"]
+    assert res["id"]
+    token = Mailer.get_inbox(@valid_attrs[:email]) 
+    password = "yolo#"
+    conn = post conn, user_path(conn, :set_password), token: token, password: password
+    assert json_response(conn, 200)["data"]
+
+    conn = post conn, user_path(conn, :login), code: res["id"], password: password
+    res = json_response(conn, 200)["data"]
+    assert res["token"]
+    
+    #user = Repo.get!(User, res["id"])
+    #new_password = "otherpass"
+    #conn = put conn, user_path(conn, :update, user), token: res["token"], password: password, new_password: new_password
+    #assert json_response(conn, 200)["data"]
+
+    #conn = post conn, user_path(conn, :login), code: res["id"], password: new_password
+    #res = json_response(conn, 200)["data"]
+    #assert res["token"]
   end
 end

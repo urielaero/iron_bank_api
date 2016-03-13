@@ -6,6 +6,7 @@ defmodule IronBank.Card do
     field :name, CardNameEnum
     field :active, :boolean, default: false
     field :type, CardTypeEnum
+    field :amount, :float, default: 0.0
     
     belongs_to :user, IronBank.User
 
@@ -13,7 +14,7 @@ defmodule IronBank.Card do
   end
 
   @required_fields ~w(type name)
-  @optional_fields ~w(active)
+  @optional_fields ~w(active amount)
 
   @doc """
   Creates a changeset based on the `model` and `params`.

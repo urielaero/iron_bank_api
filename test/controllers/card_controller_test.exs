@@ -24,6 +24,7 @@ defmodule IronBank.CardControllerTest do
       "type" => "debit",
       "card_number" => card.id,
       "name" => card.name,
+      "amount" => card.amount,
       "active" => card.active}
 
 
@@ -77,5 +78,23 @@ defmodule IronBank.CardControllerTest do
     conn = delete conn, card_path(conn, :delete, card), token: user_executive_token
     assert response(conn, 204)
     refute Repo.get(Card, card.id)
+  end
+
+  test "failed amount if UserTypeEnum == 0" do
+    user_normal = UserControllerTest.insert_user(0, 'mypass')
+    valid = Dict.put(@valid_attrs, :token, user_normal)
+            |> Dict.put(:amount, 12)
+    card = Repo.insert! %Card{}
+    conn = put conn, card_path(conn, :update, card), valid
+    assert json_response(conn, 401)
+  end
+
+  test "update amount if UserTypeEnum > 0" do
+    user_executive_token = UserControllerTest.insert_user(2, 'mypass')
+    valid = Dict.put(@valid_attrs, :token, user_executive_token)
+            |> Dict.put(:amount, 12)
+    card = Repo.insert! %Card{}
+    conn = put conn, card_path(conn, :update, card), valid
+    assert json_response(conn, 200)["data"]["amount"] === 12.0
   end
 end

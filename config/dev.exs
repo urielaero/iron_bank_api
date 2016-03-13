@@ -36,11 +36,20 @@ config :phoenix, :stacktrace_depth, 20
 config :iron_bank, IronBank.Repo,
   adapter: Mongo.Ecto,
   database: "iron_bank_dev",
+  hostname: "10.9.8.14",
+  #host: "10.9.8.14",
   pool_size: 10
 
-config :iron_bank, cn_admin: "cn=admin,dc=openstack,dc=org",
-                   cn_password: "password",
-                   ldap_context: "ou=Users,dc=openstack,dc=org"
+
+#config :iron_bank, cn_admin: "cn=admin,dc=openstack,dc=org",
+#                   cn_password: "password",
+#                   ldap_context: "ou=Users,dc=openstack,dc=org"
+
+config :iron_bank, cn_admin: "cn=admin,dc=test,dc=com",
+                   cn_password: "antony",
+                   ldap_context: "ou=usuarios,dc=test,dc=com",
+                   ldap_host: "10.9.8.10"
+
 
 config :iron_bank, mailgun_domain: System.get_env("MAILGUN_DOMAIN"),
                    mailgun_key: System.get_env("MAILGUN_KEY")
@@ -49,4 +58,4 @@ config :iron_bank, mailer_api: Util.Mailer,
                    ldap_api: Util.GenLdap.InMemory,
                    token_api: Phoenix.Token
 
-config :iron_bank, :http_front, "http://localhost:4000"
+config :iron_bank, :http_front, "http://localhost:8000"

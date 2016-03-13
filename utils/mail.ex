@@ -30,7 +30,7 @@ defmodule Util.Mailer.InMemory do
     end, name: __MODULE__)
   end
 
-  def send_url_password(email, url, token) do
+  def send_url_password(email, _url, token) do
     Agent.update(__MODULE__, &(Dict.put(&1, email, token)))
   end
 

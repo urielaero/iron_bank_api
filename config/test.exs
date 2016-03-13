@@ -19,6 +19,11 @@ config :iron_bank, cn_admin: "cn=admin,dc=openstack,dc=org",
                    cn_password: "password",
                    ldap_context: "ou=Users,dc=openstack,dc=org"
 
+#config :iron_bank, cn_admin: "cn=admin,dc=test,dc=com",
+#                   cn_password: "antony",
+#                   ldap_context: "ou=Users,dc=test,dc=com",
+#                   ldap_host: "10.9.8.10"
+
 config :iron_bank, mailgun_domain: System.get_env("MAILGUN_DOMAIN"),
                    mailgun_key: System.get_env("MAILGUN_KEY")
 

@@ -22,6 +22,10 @@ defmodule Util.GenLdap do
     GenServer.call(__MODULE__, {:set_password, cn, password})
   end
 
+  def set_password(cn, old_password, new_password) do
+    GenServer.call(__MODULE__, {:set_password, cn, old_password, new_password })
+  end
+
   def simple_bind(cn, password) do
     GenServer.call(__MODULE__, {:simple_bind, cn, password})
   end
@@ -39,8 +43,7 @@ defmodule Util.GenLdap do
 
   # callbacks
   def init({:ok, cn_admin, password}) do
-    #TODO implementar el supervisor tree.
-    host = "localhost"
+    host =  Application.get_env(:iron_bank, :ldap_host, "localhost") 
     port = 389
     case :eldap.open([to_char_list(host), port: port]) do
       {:ok, pid} -> {:ok, %{pid: pid, cn_admin: cn_admin, password: password}}
@@ -68,6 +71,7 @@ defmodule Util.GenLdap do
 
     :eldap.simple_bind(pid, cn_admin, password_admin)
     res = :eldap.add(pid, cn, attributes)
+    #IO.inspect res
     {:reply, res, ldap}
   end
 
@@ -77,6 +81,15 @@ defmodule Util.GenLdap do
 
     :eldap.simple_bind(pid, cn_admin, password_admin)
     res = :eldap.modify_password(pid, cn, password)
+    {:reply, res, ldap}
+  end
+
+  def handle_call({:set_password, cn, old_password, new_password}, _from, %{pid: pid, 
+                  cn_admin: cn_admin, 
+                  password: password_admin} = ldap) do
+
+    :eldap.simple_bind(pid, cn_admin, password_admin)
+    res = :eldap.modify_password(pid, cn, new_password, old_password)
     {:reply, res, ldap}
   end
 
@@ -109,6 +122,19 @@ defmodule Util.GenLdap.InMemory do
     File.close(file)
 
     Agent.update(__MODULE__, &(Dict.put(&1, cn, password)))
+  end
+
+  def set_password(cn, password, new_password) do
+    file_name = "test_pass_update.txt"
+    {stat, body} = File.read(file_name)
+    if stat != :ok do
+      body = ""
+    end
+    
+    {:ok, file} = File.open(file_name, [:write])
+    IO.write file, "#{body} \n #{cn},#{password},#{new_password}"
+    File.close(file)
+    if verify(cn, password), do: Agent.update(__MODULE__, &(Dict.put(&1, cn, password))), else: false
   end
 
   def verify(cn, password) do

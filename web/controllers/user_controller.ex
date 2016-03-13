@@ -31,7 +31,7 @@ defmodule IronBank.UserController do
     case Repo.insert(changeset) do
       {:ok, user} ->
         token = Phoenix.Token.sign(conn, "email", user.id)
-        url = "#{@http_front}/post_register/?token=#{token}"
+        url = "#{@http_front}/#/register?token=#{token}"
         url_encode = URI.encode(url)
         spawn_link fn ->
           @mailer_api.send_url_password(user.email, url_encode, token)
@@ -55,6 +55,11 @@ defmodule IronBank.UserController do
   end
 
   def swaggerdoc_update, do: Doc.update
+
+  #def update(conn, %{"id" => id, "password" => password, "new_password" => new_password}) do
+  #  IO.puts "YOLO!!!"
+    
+  #end
 
   def update(conn, %{"id" => id} = user_params) do
     user = Repo.get!(User, id)

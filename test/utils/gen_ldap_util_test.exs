@@ -19,7 +19,9 @@ defmodule Util.GenLdapTest do
   end
 
   test "check simple_bind" do
-    assert GenLdap.simple_bind("cn=admin,dc=openstack,dc=org", "password") == :ok
+    user = Application.get_env(:iron_bank, :cn_admin) 
+    pass = Application.get_env(:iron_bank, :cn_password) 
+    assert GenLdap.simple_bind(user, pass) == :ok
   end
 
   test "create user " do
@@ -43,6 +45,23 @@ defmodule Util.GenLdapTest do
     password = 'lolol'
     assert GenLdap.set_password(cn, password) == :ok
   end
+
+  test "failed to update with bad old password" do
+    cn = 'cn=54da3fde31f40c76004324c9,ou=Users,dc=openstack,dc=org'
+    password = 'bad password'
+    update_password = 'algo2'
+    assert GenLdap.set_password(cn, password, update_password) == {:error, {:response, :unwillingToPerform}}
+    assert GenLdap.set_password(cn, 'lolol') == :ok
+  end
+
+  test "update password" do
+    cn = 'cn=54da3fde31f40c76004324c9,ou=Users,dc=openstack,dc=org'
+    password = 'lolol'
+    update_password = 'algo2'
+    assert GenLdap.set_password(cn, password, update_password) == :ok
+  end
+
+
 
   test "verify user password" do
     cn = 'cn=Antony Tzel ADot Ciau,ou=Users,dc=openstack,dc=org'
