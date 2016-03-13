@@ -36,8 +36,7 @@ config :phoenix, :stacktrace_depth, 20
 config :iron_bank, IronBank.Repo,
   adapter: Mongo.Ecto,
   database: "iron_bank_dev",
-  hostname: "10.9.8.14",
-  #host: "10.9.8.14",
+  #hostname: "10.9.8.14",
   pool_size: 10
 
 
