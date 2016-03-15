@@ -3,6 +3,7 @@ defmodule IronBank.CardControllerTest do
 
   alias IronBank.Card
   alias IronBank.UserControllerTest
+  alias IronBank.User
   @valid_attrs %{active: true, name: :nomina, type: :credit}
   @invalid_attrs %{}
 
@@ -25,6 +26,7 @@ defmodule IronBank.CardControllerTest do
       "card_number" => card.id,
       "name" => card.name,
       "amount" => card.amount,
+      "user_id" => card.user_id,
       "active" => card.active}
 
 
@@ -43,6 +45,18 @@ defmodule IronBank.CardControllerTest do
     conn = post conn, card_path(conn, :create), valid
     assert json_response(conn, 201)["data"]["id"]
     assert Repo.get_by(Card, @valid_attrs)
+  end
+
+  test "add card to user" do
+    user = Repo.insert!(%User{})
+    user_executive_token = UserControllerTest.insert_user(2, 'mypass')
+    valid = @valid_attrs
+    valid = Dict.put(valid, :token, user_executive_token)
+          |> Dict.put(:user_id, user.id)
+    conn = post conn, card_path(conn, :create), valid
+    assert json_response(conn, 201)["data"]["user_id"] == user.id
+    assert Repo.get_by(Card, @valid_attrs)
+    
   end
 
   test "does not create resource and renders errors when data is invalid", %{conn: conn} do
@@ -79,6 +93,8 @@ defmodule IronBank.CardControllerTest do
     assert response(conn, 204)
     refute Repo.get(Card, card.id)
   end
+
+
 
   test "failed amount if UserTypeEnum == 0" do
     user_normal = UserControllerTest.insert_user(0, 'mypass')

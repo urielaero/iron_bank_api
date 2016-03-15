@@ -41,6 +41,7 @@ defmodule IronBank.UserControllerTest do
       "phone" => user.phone,
       "code" => user.id,
       "type" => user.type,
+      "cards" => [],
       "active" => user.active}
   end
 
@@ -48,6 +49,17 @@ defmodule IronBank.UserControllerTest do
     assert_raise Ecto.NoResultsError, fn ->
       get conn, user_path(conn, :show, "54da3fde31f40c76004324c9")
     end
+  end
+
+  test "should render cards" do
+    user = Repo.insert! %User{}
+    card1 = Repo.insert! %IronBank.Card{user_id: user.id}
+    card2 = Repo.insert! %IronBank.Card{user_id: user.id}
+    conn = get conn, user_path(conn, :show, user)
+    res = json_response(conn, 200)["data"]
+    [c1, c2] = res["cards"]
+    assert c1["id"] == card1.id
+    assert c2["id"] == card2.id
   end
 
   @tag :only

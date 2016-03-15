@@ -14,7 +14,7 @@ defmodule IronBank.Card do
   end
 
   @required_fields ~w(type name)
-  @optional_fields ~w(active amount)
+  @optional_fields ~w(active amount user_id)
 
   @doc """
   Creates a changeset based on the `model` and `params`.

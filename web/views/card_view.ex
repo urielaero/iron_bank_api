@@ -15,6 +15,7 @@ defmodule IronBank.CardView do
       card_number: card.id,
       name: card.name,
       amount: card.amount,
+      user_id: card.user_id,
       active: card.active}
   end
 end

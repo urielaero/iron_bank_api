@@ -10,6 +10,7 @@ defmodule IronBank.UserView do
   end
 
   def render("user.json", %{user: user}) do
+    cards = render_cards(user.cards)
     %{id: user.id,
       name: user.name,
       last_name: user.last_name,
@@ -18,6 +19,7 @@ defmodule IronBank.UserView do
       phone: user.phone,
       code: user.id,
       type: user.type,
+      cards: cards,
       active: user.active}
   end
 
@@ -36,4 +38,16 @@ defmodule IronBank.UserView do
         active: user.active}
     }
   end
+
+  defp render_cards([head|tail]) do
+    [%{
+      active: head.active,
+      type: head.type,
+      amount: head.amount,
+      name: head.name,
+      id: head.id,
+      card_number: head.id
+    } | render_cards(tail)]
+  end
+  defp render_cards(_cards), do: []
 end

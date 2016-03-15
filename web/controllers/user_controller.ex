@@ -51,6 +51,7 @@ defmodule IronBank.UserController do
 
   def show(conn, %{"id" => id}) do
     user = Repo.get!(User, id)
+            |> Repo.preload(:cards)
     render(conn, "show.json", user: user)
   end
 
