@@ -96,7 +96,7 @@ defmodule IronBank.UserController do
     end
   end
 
-  defp do_create_ldap(user, password) do
+  def do_create_ldap(user, password) do
     ldap = User.format_ldap(user)
     ch_password = to_char_list(password)
     case @ldap_api.create(ldap.cn, ldap.attributes) do
