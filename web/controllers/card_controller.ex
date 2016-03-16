@@ -69,6 +69,11 @@ defmodule IronBank.CardController do
     Dict.put(params, "amount", card.amount + amount)
   end
 
+  defp amount(card, %{"amount" => amount} = params) when is_binary(amount) do
+    {val, _} = Integer.parse(amount)
+    Dict.put(params, "amount", card.amount + val)
+  end
+
   defp amount(_card, params) do 
     params
   end
