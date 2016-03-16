@@ -113,4 +113,22 @@ defmodule IronBank.CardControllerTest do
     conn = put conn, card_path(conn, :update, card), valid
     assert json_response(conn, 200)["data"]["amount"] === 12.0
   end
+
+  test "if amount is positive, increment amount" do
+    user_executive_token = UserControllerTest.insert_user(2, 'mypass')
+    valid = Dict.put(@valid_attrs, :token, user_executive_token)
+            |> Dict.put(:amount, 12)
+    card = Repo.insert! %Card{amount: 50.0}
+    conn = put conn, card_path(conn, :update, card), valid
+    assert json_response(conn, 200)["data"]["amount"] === 62.0
+  end
+
+  test "if amount is negative, decrement amount" do
+    user_executive_token = UserControllerTest.insert_user(2, 'mypass')
+    valid = Dict.put(@valid_attrs, :token, user_executive_token)
+            |> Dict.put(:amount, -12)
+    card = Repo.insert! %Card{amount: 50.0}
+    conn = put conn, card_path(conn, :update, card), valid
+    assert json_response(conn, 200)["data"]["amount"] === 38.0
+  end
 end

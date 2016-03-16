@@ -52,8 +52,9 @@ defmodule IronBank.CardController do
 
   def update(conn, %{"id" => id} = card_params, _user_auth) do
     card = Repo.get!(Card, id)
+    
+    card_params = amount(card, card_params)
     changeset = Card.changeset(card, card_params)
-
     case Repo.update(changeset) do
       {:ok, card} ->
         render(conn, "show.json", card: card)
@@ -62,6 +63,14 @@ defmodule IronBank.CardController do
         |> put_status(:unprocessable_entity)
         |> render(IronBank.ChangesetView, "error.json", changeset: changeset)
     end
+  end
+
+  defp amount(card, %{"amount" => amount} = params) when is_number(amount) do
+    Dict.put(params, "amount", card.amount + amount)
+  end
+
+  defp amount(_card, params) do 
+    params
   end
 
   def delete(conn, %{"id" => id}) do
