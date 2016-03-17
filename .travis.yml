@@ -1,2 +1,4 @@
 services: mongodb
 language: elixir
+elixir: 
+  - 1.1.0
