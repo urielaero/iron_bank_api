@@ -16,9 +16,9 @@ defmodule Mix.Tasks.Users do
     UserController.do_create_ldap(admin, "admin")
     UserController.do_create_ldap(executive, "executive")
     UserController.do_create_ldap(cashier, "cashier")
-    print_id(admin)
-    print_id(executive)
-    print_id(cashier)
+    #print_id(admin)
+    #print_id(executive)
+    #print_id(cashier)
   end
 
 

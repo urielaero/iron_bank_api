@@ -58,4 +58,4 @@ config :iron_bank, mailer_api: Util.Mailer,
                    ldap_api: Util.GenLdap.InMemory,
                    token_api: Phoenix.Token
 
-config :iron_bank, :http_front, "http://localhost:8000"
+config :iron_bank, :http_front, "http://localhost:8080"
