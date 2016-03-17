@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/urielaero/iron_bank_api.svg?branch=master)](https://travis-ci.org/urielaero/iron_bank_api)
+
 # IronBank
 
 To start your Phoenix app:
