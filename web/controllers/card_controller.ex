@@ -4,6 +4,7 @@ defmodule IronBank.CardController do
   alias IronBank.Card
   alias IronBankDoc.Card, as: Doc
   alias IronBank.User
+  alias IronBank.Transfer
   alias Util.PlugAuthToken
 
   @password_salt "moo7ukuS"
@@ -24,6 +25,7 @@ defmodule IronBank.CardController do
 
     case Repo.insert(changeset) do
       {:ok, card} ->
+        transfer(card_params["user_id"], card.id, 0.0)
         conn
         |> put_status(:created)
         |> render("show.json", card: card)
@@ -52,11 +54,14 @@ defmodule IronBank.CardController do
 
   def update(conn, %{"id" => id} = card_params, _user_auth) do
     card = Repo.get!(Card, id)
-    
     card_params = amount(card, card_params)
     changeset = Card.changeset(card, card_params)
     case Repo.update(changeset) do
       {:ok, card} ->
+        amount = card_params["amount"]
+        if amount != nil do
+          transfer(card.user_id, card.id, amount)
+        end
         render(conn, "show.json", card: card)
       {:error, changeset} ->
         conn
@@ -86,5 +91,14 @@ defmodule IronBank.CardController do
     Repo.delete!(card)
 
     send_resp(conn, :no_content, "")
+  end
+
+  defp transfer(user_id, card_id, amount) do
+    params = %{user_id: user_id, card_id: card_id, amount: amount} 
+    changeset = Transfer.changeset(%Transfer{}, params)
+    case Repo.insert(changeset) do
+      {:ok, card} -> card
+      {:error, changeset} -> changeset
+    end
   end
 end

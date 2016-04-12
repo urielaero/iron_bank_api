@@ -33,6 +33,10 @@ defmodule IronBank.Router do
 
     resources "/banks", BankController, except: [:new, :edit]
 
+    get "/transfers/month", TransferController, :month
+
+    resources "/transfers", TransferController, except: [:new, :edit]
+
   end
 
   # Other scopes may use custom stacks.

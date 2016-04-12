@@ -15,6 +15,8 @@ defmodule IronBank.User do
 
     has_many :cards, IronBank.Card
 
+    has_many :transfers, IronBank.Transfer
+
     timestamps
   end
 

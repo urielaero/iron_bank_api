@@ -10,6 +10,8 @@ defmodule IronBank.Card do
     
     belongs_to :user, IronBank.User
 
+    has_many :transfers, IronBank.Transfer
+
     timestamps
   end
 

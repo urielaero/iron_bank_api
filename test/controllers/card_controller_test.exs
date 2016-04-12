@@ -4,6 +4,7 @@ defmodule IronBank.CardControllerTest do
   alias IronBank.Card
   alias IronBank.UserControllerTest
   alias IronBank.User
+  alias IronBank.Transfer
   @valid_attrs %{active: true, name: :nomina, type: :credit}
   @invalid_attrs %{}
 
@@ -130,5 +131,30 @@ defmodule IronBank.CardControllerTest do
     card = Repo.insert! %Card{amount: 50.0}
     conn = put conn, card_path(conn, :update, card), valid
     assert json_response(conn, 200)["data"]["amount"] === 38.0
+  end
+
+  test "if create card, create a transfer with value of 0" do
+    user_executive_token = UserControllerTest.insert_user(2, 'mypass')
+    user_client = Repo.insert! %User{type: 0}
+    valid = @valid_attrs
+            |> Dict.put(:token, user_executive_token)
+            |> Dict.put(:user_id, user_client.id)
+    conn = post conn, card_path(conn, :create), valid
+    card = json_response(conn, 201)["data"]
+    assert card["id"]
+    assert Repo.get_by(Transfer, user_id: user_client.id, card_id: card["id"])
+  end
+
+  test "when amount change, create a transfer with that transfer" do
+    user_executive_token = UserControllerTest.insert_user(2, 'mypass')
+    user_client = Repo.insert! %User{type: 0}
+    valid = Dict.put(@valid_attrs, :token, user_executive_token)
+            |> Dict.put(:amount, 12)
+    card = Repo.insert! %Card{amount: 0.0, user_id: user_client.id}
+    conn = put conn, card_path(conn, :update, card), valid
+    res = json_response(conn, 200)["data"]
+    assert res["amount"] == 12
+    assert Repo.get_by(Transfer, user_id: user_client.id, card_id: res["id"], amount: 12)
+
   end
 end
