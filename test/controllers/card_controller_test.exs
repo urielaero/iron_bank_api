@@ -101,8 +101,6 @@ defmodule IronBank.CardControllerTest do
 
   test "transfer from a client to b amount" do
     user_token = UserControllerTest.insert_user(0, 'mypass')
-
-
     user_a = Repo.insert! %User{email: "a@host.com"}
     card_a = Repo.insert! %Card{user_id: user_a.id, amount: 13.0}
 
