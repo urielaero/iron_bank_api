@@ -99,13 +99,15 @@ defmodule IronBank.CardControllerTest do
 
 
 
-  test "failed amount if UserTypeEnum == 0" do
-    user_normal = UserControllerTest.insert_user(0, 'mypass')
-    valid = Dict.put(@valid_attrs, :token, user_normal)
+  test "transfer from a client to b amount" do
+    user_a = UserControllerTest.insert_user(0, 'mypass')
+
+    valid = Dict.put(@valid_attrs, :token, user_a)
             |> Dict.put(:amount, 12)
-    card = Repo.insert! %Card{}
+    user_b = Repo.insert! %User{email: "b@host.com"}
+    card = Repo.insert! %Card{user_id: user_b.id}
     conn = put conn, card_path(conn, :update, card), valid
-    assert json_response(conn, 401)
+    assert json_response(conn, 200)["data"]["amount"] === 12.0
   end
 
   test "update amount if UserTypeEnum > 0" do

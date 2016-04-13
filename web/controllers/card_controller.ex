@@ -45,13 +45,18 @@ defmodule IronBank.CardController do
     render(conn, "show.json", card: card)
   end
 
+  defp update_from_client(conn, %{"amount" => amount} = card_params, user_deposit) when amount > 0 do
+    update(conn, card_params, user_deposit)
+  end
+
   def swaggerdoc_update, do: Doc.update
 
   def update(conn, card_params) do
     user_id = PlugAuthToken.get_data(conn)
     user = Repo.get!(User, user_id)
     if (user.type != :client), do: update(conn, card_params, user),
-    else: PlugAuthToken.unauthorized(conn)
+    else: update_from_client(conn, card_params, user)
+    #PlugAuthToken.unauthorized(conn)
   end
 
   def update(conn, %{"id" => id} = card_params, _user_auth) do
