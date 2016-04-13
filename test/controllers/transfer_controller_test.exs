@@ -24,6 +24,7 @@ defmodule IronBank.TransferControllerTest do
     conn = get conn, transfer_path(conn, :show, transfer)
     assert json_response(conn, 200)["data"] == %{"id" => transfer.id,
       "amount" => transfer.amount,
+      "amount_now" => transfer.amount_now,
       "card" => %{}, 
       "user" => %{}}
   end

@@ -19,6 +19,7 @@ defmodule IronBank.TransferView do
     user = render_rel(transfer.user)
     %{id: transfer.id,
       amount: transfer.amount,
+      amount_now: transfer.amount_now,
       card: card,
       user: user}
   end
