@@ -11,6 +11,8 @@ defmodule IronBank.CardController do
   @auth_required [:create, :update, :delete]
   plug PlugAuthToken, [salt: @password_salt] when action in @auth_required
 
+  @mailer_api Application.get_env(:iron_bank, :mailer_api) 
+
   def swaggerdoc_index, do: Doc.index
 
   def index(conn, _params) do
@@ -25,7 +27,7 @@ defmodule IronBank.CardController do
 
     case Repo.insert(changeset) do
       {:ok, card} ->
-        transfer(card_params["user_id"], card.id, 0.0)
+        transfer(card_params["user_id"], card, 0.0)
         conn
         |> put_status(:created)
         |> render("show.json", card: card)
@@ -54,13 +56,13 @@ defmodule IronBank.CardController do
 
   def update(conn, %{"id" => id} = card_params, _user_auth) do
     card = Repo.get!(Card, id)
-    card_params = amount(card, card_params)
+    {card_params, amount} = amount(card, card_params)
     changeset = Card.changeset(card, card_params)
     case Repo.update(changeset) do
       {:ok, card} ->
-        amount = card_params["amount"]
         if amount != nil do
-          transfer(card.user_id, card.id, amount)
+          transfer(card.user_id, card, amount)
+          notify_amount(amount, card)
         end
         render(conn, "show.json", card: card)
       {:error, changeset} ->
@@ -71,16 +73,43 @@ defmodule IronBank.CardController do
   end
 
   defp amount(card, %{"amount" => amount} = params) when is_number(amount) do
-    Dict.put(params, "amount", card.amount + amount)
+    {Dict.put(params, "amount", card.amount + amount), amount}
   end
 
   defp amount(card, %{"amount" => amount} = params) when is_binary(amount) do
     {val, _} = Integer.parse(amount)
-    Dict.put(params, "amount", card.amount + val)
+    {Dict.put(params, "amount", card.amount + val), val}
   end
 
   defp amount(_card, params) do 
-    params
+    {params, nil}
+  end
+
+  defp notify_amount(nil, _), do: :ok
+  defp notify_amount(amount, card) when amount > 0 do 
+    nofity_transaction("Deposito", card, amount)
+  end
+
+  defp notify_amount(amount, card) when amount < 0 do 
+    nofity_transaction("Retiro", card, amount)
+  end
+
+  defp nofity_transaction(action, card, amount) do
+    if @mailer_api.inMemory? do
+      do_nofity_transaction(action, card, amount)
+    else
+      spawn_link fn -> 
+        do_nofity_transaction(action, card, amount)
+      end
+    end
+    :ok
+  end
+
+  defp do_nofity_transaction(action, card, amount) do
+    user = Repo.get!(User, card.user_id)
+    abs_amount = abs(amount)
+    info = "#{action} con valor de #{abs_amount} correcto, nuevo saldo: #{card.amount}"
+    @mailer_api.send_notify(user.email, action, info)
   end
 
   def delete(conn, %{"id" => id}) do
@@ -93,8 +122,8 @@ defmodule IronBank.CardController do
     send_resp(conn, :no_content, "")
   end
 
-  defp transfer(user_id, card_id, amount) do
-    params = %{user_id: user_id, card_id: card_id, amount: amount} 
+  defp transfer(user_id, card, amount) do
+    params = %{user_id: user_id, card_id: card.id, amount: amount, amount_now: card.amount} 
     changeset = Transfer.changeset(%Transfer{}, params)
     case Repo.insert(changeset) do
       {:ok, card} -> card

@@ -5,13 +5,14 @@ defmodule IronBank.Transfer do
 
   schema "transfers" do
     field :amount, :float
+    field :amount_now, :float
     belongs_to :user, IronBank.User
     belongs_to :card, IronBank.Card
 
     timestamps
   end
 
-  @required_fields ~w(amount user_id card_id)
+  @required_fields ~w(amount user_id card_id amount_now)
   @optional_fields ~w()
 
   @preload_rels [:user, :card]

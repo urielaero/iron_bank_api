@@ -5,11 +5,13 @@ defmodule IronBank.CardControllerTest do
   alias IronBank.UserControllerTest
   alias IronBank.User
   alias IronBank.Transfer
+  alias Util.Mailer.InMemory, as: Mailer
   @valid_attrs %{active: true, name: :nomina, type: :credit}
   @invalid_attrs %{}
 
   setup do
     conn = conn() |> put_req_header("accept", "application/json")
+    Mailer.start_link
     Util.PlugAuthTokenTest.start_link
     {:ok, conn: conn}
   end
@@ -110,27 +112,40 @@ defmodule IronBank.CardControllerTest do
     user_executive_token = UserControllerTest.insert_user(2, 'mypass')
     valid = Dict.put(@valid_attrs, :token, user_executive_token)
             |> Dict.put(:amount, 12)
-    card = Repo.insert! %Card{}
+    user = Repo.insert! %User{email: "uno@host.com"}
+    card = Repo.insert! %Card{user_id: user.id}
     conn = put conn, card_path(conn, :update, card), valid
     assert json_response(conn, 200)["data"]["amount"] === 12.0
+
+    #notify 
+    add = Mailer.get_notify("uno@host.com", "Deposito")
+    assert add =~ "Deposito con valor de 12"
   end
 
   test "if amount is positive, increment amount" do
     user_executive_token = UserControllerTest.insert_user(2, 'mypass')
     valid = Dict.put(@valid_attrs, :token, user_executive_token)
             |> Dict.put(:amount, "12")
-    card = Repo.insert! %Card{amount: 50.0}
+    user = Repo.insert! %User{email: "dos@host.com"}
+    card = Repo.insert! %Card{amount: 50.0, user_id: user.id}
     conn = put conn, card_path(conn, :update, card), valid
     assert json_response(conn, 200)["data"]["amount"] === 62.0
+    #notify 
+    add = Mailer.get_notify("dos@host.com", "Deposito")
+    assert add =~ "62"
   end
 
   test "if amount is negative, decrement amount" do
     user_executive_token = UserControllerTest.insert_user(2, 'mypass')
     valid = Dict.put(@valid_attrs, :token, user_executive_token)
             |> Dict.put(:amount, -12)
-    card = Repo.insert! %Card{amount: 50.0}
+    user = Repo.insert! %User{email: "tres@host.com"}
+    card = Repo.insert! %Card{amount: 50.0, user_id: user.id}
     conn = put conn, card_path(conn, :update, card), valid
     assert json_response(conn, 200)["data"]["amount"] === 38.0
+    #notify 
+    add = Mailer.get_notify("tres@host.com", "Retiro")
+    add =~ "38.0"
   end
 
   test "if create card, create a transfer with value of 0" do

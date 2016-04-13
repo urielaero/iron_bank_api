@@ -83,7 +83,12 @@ defmodule IronBank.UserController do
       {:ok, id} -> 
         user = Repo.get!(User, id)
         case do_create_ldap(user, password) do
-          :ok -> render(conn, "show.json", user: user)
+          :ok -> 
+              spawn_link fn ->
+                register_info = "Registrado correctamente con el codigo de usuario: #{user.id}"
+                @mailer_api.send_notify(user.email, "Registro correcto", register_info)
+              end
+            render(conn, "show.json", user: user)
           {:error, msg} ->
             conn
             |> put_status(:unprocessable_entity)

@@ -20,6 +20,16 @@ defmodule Util.Mailer do
 
     do_send(email, html)
   end
+
+  def send_notify(email, action, msg) do
+    html ="<p> Se a realizado la siguente accion: <br/> #{msg} <br/> para mas información consulte su cuenta </p>"
+    send_email to: email,
+               from: @from,
+               subject: action,
+               html: html
+  end
+
+  def inMemory?(), do: false
 end
 
 defmodule Util.Mailer.InMemory do
@@ -35,8 +45,20 @@ defmodule Util.Mailer.InMemory do
   end
 
   def get_inbox(email) do
-    Agent.get(__MODULE__, fn inboxs -> 
-      Dict.get(inboxs, email)
+    Agent.get_and_update(__MODULE__, fn inboxs -> 
+      Dict.pop(inboxs, email)
     end)
   end
+
+  def get_notify(email, action) do
+    Agent.get(__MODULE__, fn inboxs -> 
+      Dict.get(inboxs, "#{email}-#{action}")
+    end)
+  end
+
+  def send_notify(email, action, msg) do
+    Agent.update(__MODULE__, &(Dict.put(&1, "#{email}-#{action}", msg)))
+  end
+
+  def inMemory?(), do: true
 end

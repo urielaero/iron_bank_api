@@ -3,7 +3,7 @@ defmodule IronBank.TransferTest do
 
   alias IronBank.Transfer
 
-  @valid_attrs %{amount: 1, user_id: "some", card_id: "some value"}
+  @valid_attrs %{amount: 1, user_id: "some", card_id: "some value", amount_now: 1}
   @invalid_attrs %{}
 
   test "changeset with valid attributes" do

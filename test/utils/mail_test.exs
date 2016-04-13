@@ -10,6 +10,9 @@ defmodule Util.MailerTest do
     assert res =~ "id"
   end
 
-
+  test "should send email with action and msg" do
+    {:ok, res} = Mailer.send_notify("aero.uriel@gmail.com", "Deposito y/o retiro", " Deposito de 5 a tu numero de cuenta")
+    assert res =~ "id"
+  end
 
 end

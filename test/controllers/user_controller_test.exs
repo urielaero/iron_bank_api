@@ -128,6 +128,10 @@ defmodule IronBank.UserControllerTest do
 
     conn = post conn, user_path(conn, :login), code: res["id"], password: "badpass"
     assert json_response(conn, 403)
+
+    #send email with user info
+    user_info = Mailer.get_notify(@valid_attrs[:email], "Registro correcto")
+    assert user_info =~ "codigo de usuario"
   end
 
   @tag :skip
