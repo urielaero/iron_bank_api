@@ -100,10 +100,16 @@ defmodule IronBank.CardControllerTest do
 
 
   test "transfer from a client to b amount" do
-    user_a = UserControllerTest.insert_user(0, 'mypass')
+    user_token = UserControllerTest.insert_user(0, 'mypass')
 
-    valid = Dict.put(@valid_attrs, :token, user_a)
+
+    user_a = Repo.insert! %User{email: "a@host.com"}
+    card_a = Repo.insert! %Card{user_id: user_a.id, amount: 13.0}
+
+    valid = Dict.put(@valid_attrs, :token, user_token)
             |> Dict.put(:amount, 12)
+            |> Dict.put(:from_card_id, card_a.id)
+
     user_b = Repo.insert! %User{email: "b@host.com"}
     card = Repo.insert! %Card{user_id: user_b.id}
     conn = put conn, card_path(conn, :update, card), valid
