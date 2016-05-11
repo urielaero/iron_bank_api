@@ -47,7 +47,7 @@ defmodule IronBank.CardController do
 
   defp update_from_client(conn, %{"amount" => amount, "from_card_id" => from_card_id} = card_params, user_deposit) when amount > 0 do
     from_card = Repo.get!(Card, from_card_id)
-    if from_card.amount >= amount do
+    if from_card.amount >= amount || user_deposit == "interbancaria" do
       update(conn, card_params, user_deposit)
     else
       PlugAuthToken.unauthorized(conn)
@@ -139,5 +139,17 @@ defmodule IronBank.CardController do
       {:ok, card} -> card
       {:error, changeset} -> changeset
     end
+  end
+
+  def bank_transfer(conn, %{"amount" => amount, "origin_account" => origin, "destination_account" => destination, "bank_origin" => bank} = params) do
+    card = Repo.get!(Card, destination)
+    user = Repo.get!(User, card.user_id)
+    params = params
+              |> Dict.put("id", card.id)
+              |> Dict.put("from_card_id", card.id)
+
+    info = "Se esta procesando una transferencia interbancaria con valor de #{amount} de la cuenta #{origin} del banco #{bank} a tu cuenta #{destination}"
+    @mailer_api.send_notify(user.email, "Transferencia interbancaria en proceso", info)
+    update_from_client(conn, params, "interbancaria")
   end
 end

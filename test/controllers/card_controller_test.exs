@@ -141,6 +141,21 @@ defmodule IronBank.CardControllerTest do
     assert add =~ "62"
   end
 
+  test "amount transfer from other banks" do
+    user_executive_token = UserControllerTest.insert_user(2, 'mypass')
+    valid = @valid_attrs |> Dict.put(:amount, "12")
+    user = Repo.insert! %User{email: "dos@host.com"}
+    card = Repo.insert! %Card{amount: 50.0, user_id: user.id, type: 0, name: 0}
+
+    params = %{"amount" => "12", "origin_account" => "some string field", "destination_account" => card.id, "bank_origin" => "some bank"}
+    conn = post conn, card_path(conn, :bank_transfer), params
+    assert json_response(conn, 200)["data"]["amount"] === 62.0
+
+    add = Mailer.get_notify("dos@host.com", "Deposito")
+    assert add =~ "62"
+
+  end
+
   test "if amount is negative, decrement amount" do
     user_executive_token = UserControllerTest.insert_user(2, 'mypass')
     valid = Dict.put(@valid_attrs, :token, user_executive_token)

@@ -29,6 +29,8 @@ defmodule IronBank.Router do
 
     resources "/users", UserController, except: [:new, :edit]
 
+    post "/cards/bank_transfer", CardController, :bank_transfer
+
     resources "/cards", CardController, except: [:new, :edit]
 
     resources "/banks", BankController, except: [:new, :edit]
